@@ -1,0 +1,401 @@
+Cache for Windows^MAC^routine output by %apiRTN^^~Format=Cache.S~^KSC5601
+%RO on 07 May 2021 02:17:29PM
+mirHomeWork^MAC^^65835,55429.070971^0
+mirHomeWork
+	;==============
+	;작성자 : 이영경
+	;작성일 : 2021-03-31 ~ 2021-04-01
+	;용도 : 작은도서관 관리 프로그램 과제
+	;==============
+	quit
+	;
+	;
+	;
+.
+Main()
+	;Main 함수 [ do Main^mirHomeWork() ]
+	while(1){
+		do printMenu^mirHomeWork()
+		new Menu
+		R Menu
+		set Menu=$$UpperCase(Menu)
+		quit:Menu="Z"
+		if (Menu="A"){	;이용자 가입
+			do userInsert^mirHomeWorkUser()
+		}
+		elseif (Menu="B"){	;이용자 조회
+			do userSelect^mirHomeWorkUser()
+		}
+		elseif (Menu="C"){	;이용자 탈퇴
+			do userDelete^mirHomeWorkUser()
+		}
+		elseif (Menu="D"){	;도서 등록
+			do cataInsert^mirHomeWorkCata()
+		}
+		elseif (Menu="E"){	;도서 조회
+			do cataSelect^mirHomeWorkCata()
+		}
+		elseif (Menu="F"){	;도서 삭제
+			do cataDelete^mirHomeWorkCata()
+		}
+		elseif (Menu="G"){	;대출
+			do lendBorrowBook^mirHomeWorkLend()
+		}
+		elseif (Menu="H"){	;반납
+			do lendReturnBook^mirHomeWorkLend()
+		}
+		elseif (Menu="I"){	;대출도서 조회
+			do lendSelectBorrowBook^mirHomeWorkLend()
+		}
+		;elseif (Menu="J"){	;반납도서 조회
+		;	do lendSelectReturnBook^mirHomeWorkLend()
+		;}
+		else  {
+			w !,"잘못된 입력입니다.",!
+		}
+	}
+	quit
+	;
+	;
+	;
+.
+printMenu()
+	;메뉴판 출력해주는 메서드
+	w !!
+	w "A. 이용자 저장",!
+	w "B. 이용자 조회",!
+	w "C. 이용자 삭제",!
+	w "-------------------------------",!!
+	w "D. 도서 등록",!
+	w "E. 도서 조회",!
+	w "F. 도서 삭제",!
+	w "-------------------------------",!!
+	w "G. 대출",!
+	w "H. 반납",!
+	w "I. 대출도서 조회",!
+	; w "J. 반납도서 조회",!
+	w "-------------------------------",!!
+	w "Z. 종료",!!
+	w "원하는 기능을 선택하세요 >"
+	quit
+	;
+	;
+	;
+.
+UpperCase(Number)
+	;소문자=>대문자로 바꾸어주는 메서드
+	new AsciiNum
+	set AsciiNum=$ASCII(Number)
+	if ((AsciiNum>=97)&&(AsciiNum<=122)) {
+		quit $CHAR(AsciiNum-32)
+	}
+	quit Number
+	;
+	;
+	;
+
+mirHomeWorkCata^MAC^^65836,46540.361636^0
+mirHomeWorkCata
+	;==============
+	;작성자 : 이영경
+	;작성일 : 2021-03-31 ~ 2021-04-01
+	;용도 : 작은도서관 관리 프로그램-목록
+	;==============
+	quit
+	;
+	;
+	;
+.
+cataInsert()
+	w !,"===[ 도서 등록 ]===",!
+	new bookNum,title,writer,publisher
+	w "등록번호를 입력하세요 > "
+	R bookNum
+	if ($G(^BMast(bookNum))'=""){
+		w !,"이미 존재하는 도서입니다.",!
+		quit
+	}
+	w !,"서명을 입력하세요 > "
+	R title
+	w !,"저자를 입력하세요 > "
+	R writer
+	w !,"출판사를 입력하세요 > "
+	R publisher
+	set ^BMast(bookNum)=title_"^"_writer_"^"_publisher
+	w !!,"등록되었습니다."
+	quit
+	;
+	;
+	;
+.
+cataSelect()
+	w !,"===[ 도서 조회 ]===",!
+	new index
+	set index=""
+	while(1){
+		set index=$O(^BMast(index))
+		quit:index=""
+		new book,status,userid
+		set book=$G(^BMast(index))
+		set userid=$G(^CHisR("R",index))
+		if (userid=""){
+			set status="대출가능"
+		}
+		else  {
+			set status="대출중 ("_userid_"-"_$P(^EndUsr(userid),"^",1)_")"
+		}
+		w "등록번호 : "_index,!
+		w "서명 : "_$P(book,"^",1),!
+		w "상태 : "_status,!!
+	}
+	quit
+	;
+	;
+	;
+	
+cataDelete()
+	w !,"===[ 도서 삭제 ]===",!
+	new bookNum,answer,lend
+	w "등록번호를 입력하세요 > "
+	R bookNum
+	w !
+	if ($G(^BMast(bookNum))=""){
+		w "존재하지 않는 번호입니다.",!
+		quit
+	}
+	w "삭제하시겠습니까?(Y/N) > "
+	R answer
+	set answer=$$UpperCase^mirHomeWork(answer)
+	if (answer="Y"){
+		w !
+		set lend=$G(^CHisR("R",bookNum))
+		if (lend=""){
+			k ^BMast(bookNum)
+			w "삭제되었습니다."
+		}
+		else  {
+			w "삭제불가 (대출중인 도서입니다.)",!
+			w "대출자 - "_lend_$P(^EndUsr(lend),"^",1),!
+		}
+	}
+	quit
+	;
+	;
+	;
+.
+
+mirHomeWorkLend^MAC^^65835,46741.041903^0
+mirHomeWorkLend
+	;==============
+	;작성자 : 이영경
+	;작성일 : 2021-03-31 ~ 2021-04-01
+	;용도 : 작은도서관 관리 프로그램-대출
+	;==============
+	quit
+	;
+	;
+	;
+lendBorrowBook()
+	w !,"===[ 대출 ]===",!
+	new userid, bookNum, date
+	w "아이디를 입력하세요 > "
+	R userid
+	w !,"등록번호를 입력하세요 > "
+	R bookNum
+	w !
+	if ($G(^EndUsr(userid))=""){
+		w "존재하지 않는 ID 입니다.",!
+		quit
+	}
+	if ($G(^BMast(bookNum))=""){
+		w "존재하지 않는 도서 입니다.",!
+		quit
+	}
+	set date=$ZDATE($H,3)
+	set ^CHisR("R",bookNum)=userid
+	set ^CHisR("R",bookNum,userid)=date
+	set ^CHisR("U",userid,bookNum)=date
+	w "대출 되었습니다."
+	quit
+	;
+	;
+	;
+	
+lendReturnBook()
+	w !,"===[ 반납 ]===",!
+	new bookNum,info,userid,answer
+	w "등록번호를 입력하세요 > "
+	R bookNum
+	w !
+	if ($G(^BMast(bookNum))=""){
+		w "등록된 도서가 아닙니다."
+		quit
+	}
+	set userid=$G(^CHisR("R",bookNum))
+	if (userid=""){
+		w "대출중인 도서가 아닙니다."
+		quit
+	}
+	w "이름 : "_userid_"("_$P($G(^EndUsr(userid)),"^",1)_")",!
+	w "대출일 : "_$G(^CHisR("R",bookNum,userid)),!!
+	w "반납하시겠습니까? (Y/N) > "
+	R answer
+	set answer=$$UpperCase^mirHomeWork(answer)
+	if (answer="Y"){
+		w !,"반납되었습니다."
+		k ^CHisR("R",bookNum)
+		k ^CHisR("U",userid,bookNum)
+	}
+	quit
+	;
+	;
+	;
+.
+lendSelectBorrowBook()
+	w !,"===[ 대출도서 조회 ]===",!
+	new index
+	set index=""
+	while(1){
+		new bookNum
+		set index=$O(^CHisR("R",index))
+		quit:index=""
+		new bookInfo,userid
+		set bookInfo=$G(^BMast(index))
+		set userid=$G(^CHisR("R",index))
+		w "등록번호 : "_$P(bookInfo,"^",1),!
+		w "서명 : "_$P(bookInfo,"^",2),!
+		w "대출자 : "_userid_"("_$P($G(^EndUsr(userid)),"^",1)_")",!!
+	}
+	quit
+	;
+	;
+	;
+	
+	;제외된 과제
+	;lendSelectReturnBook()
+	;	w !,"===[ 반납도서 조회 ]===",!
+	;	quit
+		;
+		;
+		;
+
+mirHomeWorkUser^MAC^^65835,58490.580059^0
+mirHomeWorkUser
+	;==============
+	;작성자 : 이영경
+	;작성일 : 2021-03-31 ~ 2021-04-01
+	;용도 : 작은도서관 관리 프로그램-이용자
+	;==============
+	quit
+	;
+	;
+	;
+	
+userInsert()
+	w !,"===[ 이용자 가입 ]===",!
+	new userid,username,userphone
+	while(1){ ;중복된 아이디가 아닐 때 while문 종료
+		new info
+		w "아이디를 입력하세요 >"
+		R userid
+		set info=$G(^EndUsr(userid))
+		if (info="") { quit}
+		else  {
+			w !,"존재하는 ID 입니다.",!
+			do printUserInfo^mirHomeWorkUser(info)
+		}
+	}
+	w !,"이름을 입력하세요 > "
+	R username
+	w !,"전화번호를 입력하세요 > "
+	R userphone
+	set ^EndUsr(userid)=username_"^"_userphone
+	w !!,"가입되었습니다.",!
+	quit
+	;
+	;
+	;
+.
+userSelect()
+	w !,"===[ 이용자 조회 ]===",!
+	new userid, info
+	w "아이디를 입력하세요 > "
+	R userid
+	set info=$G(^EndUsr(userid))
+	w !
+	if (info="") {w "존재하지 않는 ID입니다.",!}
+	else  {
+		if ($O(^CHisR("U",userid,""))=""){
+			w "대출중인 도서가 없습니다."
+		}
+		else  {
+			do printUserInfo^mirHomeWorkUser(info)
+		}
+		
+	}
+	quit
+	;
+	;
+	;
+.
+userDelete()
+	w !,"===[ 이용자 탈퇴 ]===",!
+	new userid
+	w "이용자 ID 를 입력하세요 > "
+	R userid
+	set info=$G(^EndUsr(userid))
+	w !
+	if (info="") {w "존재하지 않는 ID입니다.",!}
+	else  {
+		if ($$checkBookLoan^mirHomeWorkUser(userid)){
+			k ^EndUsr(userid)
+			w "탈퇴 되었습니다."
+		}
+		else {
+			w "탈퇴불가 (반납되지 않은 도서가 있습니다.)",!
+			do printLendBookInfo^mirHomeWorkUser(userid)
+			
+		}
+	}
+	quit
+	;
+	;
+	;
+.
+checkBookLoan(userid)
+	;회원(userid)이 책을 대출중이라면 0, 아니라면 1
+	if ($O(^CHisR("U",userid,""))=""){
+		quit 1
+	}
+	quit 0
+	;
+	;
+	;
+	
+printUserInfo(info)
+	;이름과 전화번호 출력 메서드
+	w "이름 : "_$P(info,"^",1),!
+	w "전화번호 : "_$P(info,"^",2),!
+	do printLendBookInfo^mirHomeWorkUser(userid)
+	quit
+	;
+	;
+	;
+.
+printLendBookInfo(userid)
+	;사용자의 대출도서목록 출력하는 메서드
+	w "대출도서",!
+	new index
+	set index=""
+	while(1){
+		set index=$O(^CHisR("U",userid,index))
+		quit:index=""
+		w "  -"_$P(^BMast(index),"^",1),!
+	}
+	quit
+	;
+	;
+	;
+
+
+

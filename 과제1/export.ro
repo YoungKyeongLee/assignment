@@ -1,0 +1,210 @@
+Cache for Windows^MAC^routine output by %apiRTN^^~Format=Cache.S~^KSC5601
+%RO on 07 May 2021 02:15:35PM
+lykHomeWork^MAC^^65836,52210.194627^0
+lykHomeWork
+	;===============================
+	;이영경
+	;2021-03-30
+	;과제용(첫번째 과제 1~4)
+	;===============================
+	quit
+	;
+	;
+	;
+.
+Task1()
+	;과제1 실행함수
+	do createStar(1,4,1,4)
+	w !!!
+	do createStar(4,1,-1,-1)
+	quit
+	;
+	;
+	;
+.
+createStar(start,end,val,em)	; 시작num,끝num,up||down,emptyNum
+	;과제1 내부함수 브레이스({) 사용하기
+	for i=start:val:end{
+		new star
+		set em=em-val
+		set star=2*i-1
+		for j=1:1:em{ w " " }
+		for k=1:1:star{ w "*" }
+		w !
+	}	
+	quit
+	;
+	;
+	;
+.
+createStarVer2(start,end,val,em)
+	;과제1 내부함수 닷 사용하기(점문법)
+	for i=start:val:end do
+	.new star
+	.set em=em-val
+	.set star=2*i-1
+	.for j=1:1:em do
+	..w " "
+	.for k=1:1:star do
+	..w "*"
+	.w !
+	quit
+	;
+	;
+	;
+.
+zTR(original,word,change)
+	;과제2 zTR 함수
+	if (original[word){ ;original 단어에 word가 하나라도 포함이 된다면 아래 과정을 거친다.
+		new index,Leng,tmp,result
+		set result=""
+		set Leng=$length(word)
+		set index=1
+		while(1){
+			set tmp=$e(original,index,(index+Leng-1)) ;tmp는 word와 길이가 같거나 작게 나온다.
+			if ($l(tmp)<$l(word)){ ; tmp의 길이가 word의 길이보다 작다면 마지막 조각 문자열이라는 뜻이니 문자열 다 붙이고 반복문 종료
+				set result=result_tmp
+				quit
+			}
+			elseif (tmp[word){	; tmp가 word에 포함되면(첫번째 if문을 지났다면 두 문자열의 길이는 같은 상태), 즉 두 문자열이 일치한다면!
+				set result=result_change
+				set index=index+Leng
+			}
+			else { ;tmp와 word가 다른 문자라면
+				set result=result_$e(original,index) ;index번째 글자만 result에 붙이고
+				set index=index+1 ;index는 다음 문자열을 비교하기 위해 +1
+			}
+		}
+	}
+	else  {	;문자열이 하나도 포함되지 않는다면 굳이 검사하지 않고 result에 original을 그대로 넣어준다.
+		set resulkt=original
+	}
+	quit result
+	;
+	;
+	;
+.
+zTRver2(original,word,change)
+	;과제2 zTR 함수 다른 방법으로 만들어보기
+	new wSize,result
+	set wSize=$L(word),result=""
+	while(1) {
+		quit:$L(original)=0
+		if ($E(original,1,wSize)=word){
+			set result=result_change
+			set original=$E(original,wSize+1,$L(original))
+		}
+		else{
+			set result=result_$E(original,1)
+			set original=$E(original,2,$L(original))
+		}
+	}
+	w "result : "_result
+	quit
+	;
+	;
+	;
+	
+zTRver3(original,word,change)
+	;과제2 zTR 함수 다른 방법으로 만들어보기2
+	new wSize,result
+	set wSize=$L(word),result=""
+	for  quit:$L(original)=0  do
+	.if ($E(original,1,wSize)=word) do
+	..set result=result_change
+	..set original=$E(original,wSize+1,$L(original))
+	.else  do
+	..set result=result_$E(original,1)
+	..set original=$E(original,2,$L(original))
+	
+	w "result : "_result
+	quit
+	;
+	;
+	;
+.
+Task3()
+	;과제3 함수
+	new evenCount,oddCount,evenSum,oddSum
+	set evenCount=0,evenSum=0,oddCount=0,oddSum=0
+	new bool
+	set bool=1
+	for i=1:1:10000 {
+		if (bool=1) {
+			set oddCount=oddCount+1
+			set oddSum=oddSum+i
+		} else  {
+			set evenCount=evenCount+1
+			set evenSum=evenSum+i
+		}
+		set bool=1-bool
+	}
+	w "짝수 개수는 "_evenCount_", 짝수 합은 "_evenSum,!
+	w "홀수 개수는 "_oddCount_", 홀수 합은 "_oddSum,!
+	quit
+	;
+	;
+	;
+.
+Task3Ver2()
+	;과제3 함수 점문법 버전
+	new evenCount,oddCount,evenSum,oddSum
+	set evenCount=0,evenSum=0,oddCount=0,oddSum=0
+	new bool
+	set bool=1
+	for i=1:1:10000 do
+	.if (bool=1) do
+	..set oddCount=oddCount+1
+	..set oddSum=oddSum+i
+	.else  do
+	..set evenCount=evenCount+1
+	..set evenSum=evenSum+i
+	.set bool=1-bool
+	w "짝수 개수는 "_evenCount_", 짝수 합은 "_evenSum,!
+	w "홀수 개수는 "_oddCount_", 홀수 합은 "_oddSum,!
+	quit
+	;
+	;
+	;
+.
+.
+Task4(value)
+	;과제4 함수, 소수?
+	new abs, checkWord
+	set checkWord=value
+	if (checkWord["."){	;점이 하나인지도 확인해야함
+		new place
+		set place=$f(checkWord,".")+1
+		if ($f(checkWord,".",place)=0){
+			set checkWord=$tr(checkWord,".","")
+		}
+	}
+	if ($f(checkWord,"-")=2){
+		set abs="-"
+		set checkWord=$p(checkWord,"-",2)
+	} else {
+		set abs="+"
+		if ($f(checkWord,"+")=2){
+			set checkWord=$p(checkWord,"+",2)
+		}
+	}
+	if (checkWord?.N){
+		if (value["."){
+			;소수점 셋제짜리까지 자르기
+			new where
+			set where=$find(value,".")
+			set value=$e(value,1,where+2)
+			quit $Fnumber(value,",+")_" : Double("_abs_") 입니다"
+		} else {
+			quit $Fnumber(value,",+")_" : Integer("_abs_") 입니다"
+		}
+	}
+	else  {
+		quit value_" : String입니다.("_$length(value)_"Char)"
+	}
+	;
+	;
+	;
+
+
+

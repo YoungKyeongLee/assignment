@@ -1,0 +1,304 @@
+Cache for Windows^MAC^routine output by %apiRTN^^~Format=Cache.S~^KSC5601
+%RO on 07 May 2021 02:19:20PM
+selfHomeWork^MAC^^65836,49510.533387^0
+selfHomeWork
+	;============================
+	;작성자 : 이영경
+	;작성일 : 2021-04-02
+	;용도 : 학사관리 만들어보기(셀프 복습!)
+	;============================
+	quit
+	;
+	;
+	;
+.
+Main()
+	; 메인함수 [ Main^selfHomeWork() ]
+	new Menu
+	set Menu=""
+	for  quit:Menu="0"  do
+	.do printMenu^selfHomeWork()
+	.R Menu
+	.w !
+	.quit:Menu="0"
+	.if (Menu="1") do	; 학생조회
+	..do selectStudent^selfHomeWorkStudent()
+	.else  if (Menu="2") do	; 학생 신규
+	..do insertStudent^selfHomeWorkStudent()
+	.else  if (Menu="3") do	; 학생 탈퇴
+	..do deleteStudent^selfHomeWorkStudent()
+	.else  if (Menu="4") do	; 성적 조회
+	..do selectScore^selfHomeWorkScore()
+	.else  if (Menu="5") do	; 성적 입력
+	..do insertScore^selfHomeWorkScore()
+	.else  do
+	..w "잘못된 메뉴입니다.",!
+	w "프로그램이 종료됩니다.",!
+	w "〓〓〓 감사합니다. 〓〓〓",!
+	quit
+	;
+	;
+	;
+	
+printMenu()
+	; 메뉴출력
+	w !!,"      ▣ 학사 관리 ▣",!!
+	w "〓〓〓〓[ 학생 ]〓〓〓〓",!!
+	w "      1. 학생 조회",!
+	w "      2. 학생 신규",!	
+	w "      3. 학생 탈퇴",!!
+	w "〓〓〓〓[ 성적 ]〓〓〓〓",!!
+	w "      4. 성적 조회",!
+	w "      5. 성적 입력",!!
+	w "〓〓〓〓〓〓〓〓〓〓〓",!!
+	w "      0. 종료",!!
+	w "입력 > "
+	quit
+	;
+	;
+	;
+.
+upperCase(word)
+	;대문자로 바꾸어주는 메서드(call by reference)
+	;호출 예시(인자값 앞에 .을 꼭 붙여주세요) : upperCase^selfHomeWork(.word)
+	new asciiNum
+	set asciiNum=$ASCII(word)
+	if ((asciiNum>=97)&&(asciiNum<=122)) do
+	.set word=$CHAR(asciiNum-32)
+	;
+	;
+	;
+
+selfHomeWorkScore^MAC^^65836,52906.043118^0
+selfHomeWorkScore
+	;===========================
+	;작성자 : 이영경
+	;작성일 : 2021-04-02 
+	;용도 : 학사정보 프로그램 성적관련 메서드들
+	;===========================
+	quit
+	;
+	;
+	;
+.
+selectScore()
+	w !,"▶ 성적 조회 ◀",!
+	new Menu,avg
+	w "모든 학생의 성적을 조회하시겠습니까?(Y:전체조회/N:평균점수검색) > "
+	r Menu
+	do upperCase^selfHomeWork(.Menu)
+	w !
+	if (Menu="Y") do
+	.do everyStudent^selfHomeWorkStudent()
+	else  if (Menu="N") do
+	.w "평균점수 범위를 입력하세요",!
+	.w "몇 점 이상으로 검색하시겠습니까? > "
+	.r avg
+	.w !
+	.do searchScore^selfHomeWorkScore(avg)
+	else  do
+	.w "잘못된 입력입니다. 메인페이지로 돌아갑니다."
+	quit
+	;
+	;
+	;
+	
+insertScore()
+	w !,"▶ 성적 입력 ◀",!
+	new studentNum
+	w "학번 입력 > "
+	r studentNum
+	w !
+	if ('$D(^Student(studentNum))) do
+	.w "잘못된 입력입니다. 메인 페이지로 돌아갑니다.",!
+	else  do
+	.new kor,eng,mat
+	.w ^Student(studentNum)_"("_studentNum_")",!
+	.do checkScore^selfHomeWorkScore(.kor,"국어")
+	.do checkScore^selfHomeWorkScore(.eng,"영어")
+	.do checkScore^selfHomeWorkScore(.mat,"수학")
+	.w !,"정상적으로 등록되었습니다."
+	.set ^Student(studentNum,"score")=kor_"^"_eng_"^"_mat
+	quit
+	;
+	;
+	;
+.
+checkScore(score,name)
+	;점수 범위를 체크해주는 메서드
+	set score=-1
+	for  quit:((score>=0)&&(score<=100))  do
+	.w name_" > "
+	.r score
+	.w !
+	.if ((score<0)||(score>100)) do
+	..w "점수의 범위가 잘못되었습니다.(0~100사이)",!
+	quit
+	;
+	;
+	;
+.
+searchScore(Search)
+	; 평균점수를 검색하면, 학생정보가 출력되는 메서드
+	w "------ 검색 결과 ------",!
+	new index
+	set index=""
+	while(1){
+		new name,scores,avg
+		set index=$O(^Student(index))
+		quit:index=""
+		set name=^Student(index)
+		set scores=^Student(index,"score")
+		set avg=($P(scores,"^",1)+$P(scores,"^",2)+$P(scores,"^",3))/3
+		if (avg[".") do
+		.set avg=$E(avg,1,$Find(avg,".")+2)
+		if (avg>=Search) do
+		.w "평균 점수 : "_avg,!
+		.do printOneStudent^selfHomeWorkStudent(index,name)
+	}
+	quit
+	;
+	;
+	;
+
+selfHomeWorkStudent^MAC^^65836,52649.683442^0
+selfHomeWorkStudent
+	;===========================
+	;작성자 : 이영경
+	;작성일 : 2021-04-02
+	;용도 : 학사정보 프로그램 학생관련 메서드들
+	;===========================
+	quit
+	;
+	;
+	;
+.
+selectStudent()
+	w !,"▶ 학생 조회 ◀",!
+	new Menu,Search
+	w "모든 학생을 조회하시겠습니까?(Y:전체조회/N:검색) > "
+	r Menu
+	w !
+	do upperCase^selfHomeWork(.Menu)
+	if (Menu="Y") do
+	.do everyStudent^selfHomeWorkStudent()
+	else  if (Menu="N") do
+	.w "학번 또는 이름 검색 > "
+	.r Search
+	.w !
+	.do searchStudent^selfHomeWorkStudent(Search)
+	else  do
+	.w "잘못된 입력입니다. 메인 페이지로 돌아갑니다."
+	quit
+	;
+	;
+	;
+.
+insertStudent()
+	w !,"▶ 학생 신규 ◀",!
+	new studentNum, studentName,Menu
+	;db lock 걸기
+	lock ^Student
+	while(1){
+		w "신규 학번을 입력하세요(취소 : 0) > "
+		r studentNum
+		quit:('(studentNum)||'($D(^Student(studentNum))))
+	}
+	w !
+	quit:studentNum="0"
+	w "학생 이름을 입력하세요 > "
+	r studentName
+	set ^Student(studentNum)=studentName
+	w !,"신규가입이 완료되었습니다.",!,"성적 정보를 바로 입력하시겠습니까? (Y:바로입력/N:나중에입력) > "
+	r Menu
+	w !
+	do upperCase^selfHomeWork(.Menu)
+	if (Menu="Y") do ;성적정보 입력메서드 실행
+	.do insertScore^selfHomeWorkScore()
+	else  do
+	.w "메인 페이지로 이동합니다.",!,"메뉴 5번으로 이동하여 추후 성적 정보를 업데이트 할 수 있습니다."
+	quit
+	;
+	;
+	;
+.
+deleteStudent()
+	w !,"▶ 학생 탈퇴 ◀",!
+	;db lock 걸기
+	new studentNum,Menu
+	w "학번을 입력하세요 > "
+	r studentNum
+	w !
+	if ($D(^Student(studentNum))) do
+	.do printOneStudent^selfHomeWorkStudent(studentNum,^Student(studentNum))
+	.w !,"정말로 삭제하시겠습니까? (Y/N) > "
+	.r Menu
+	.w !
+	.do upperCase^selfHomeWork(.Menu)
+	.if (Menu="Y") do
+	..k ^Student(studentNum)
+	..w "삭제되었습니다.",!
+	.else  if (Menu="N") do
+	..w "삭제를 취소합니다. 메인 페이지로 이동합니다.",!
+	.else  do
+	..w "잘못된 입력입니다. 메인으로 이동합니다.",!
+	else  do
+	.w "존재하지 않는 정보입니다.",!
+	quit
+	;
+	;
+	;
+.
+everyStudent()
+	; 모든 학생이 출력되는 메서드
+	w "------ 전체 조회 ------",!
+	new index
+	set index=""
+	while(1){
+		new name
+		set index=$O(^Student(index))
+		quit:index=""
+		set name=^Student(index)
+		do printOneStudent^selfHomeWorkStudent(index,name)
+	}
+	quit
+	;
+	;
+	;
+.
+searchStudent(Search)
+	; 학번 또는 이름으로 검색하면, 학생정보가 출력되는 메서드
+	w "------ 검색 결과 ------",!
+	new index
+	set index=""
+	while(1){
+		new name
+		set index=$O(^Student(index))
+		quit:index=""
+		set name=^Student(index)
+		if ((index[Search)||(name[Search)) do
+		.do printOneStudent^selfHomeWorkStudent(index,name)
+	}
+	quit
+	;
+	;
+	;
+.
+printOneStudent(index,name)
+	;한 학생에 대한 정보를 출력하는 메서드(중복사용하기 때문에 메서드를 따로 만들었습니다)
+	new score
+	w "학번 : "_index,!
+	w "이름 : "_name,!
+	set score=$G(^Student(index,"score"))
+	if (score'="") do
+	.w "성적 : "_"국어["_$P(score,"^",1)_"] 영어["_$P(score,"^",2)_"] 수학["_$P(score,"^",3)_"]",!
+	else  do
+	.w "성적 : 정보없음",!
+	w !
+	quit
+	;
+	;
+	;
+
+
+
